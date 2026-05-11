@@ -1,0 +1,21 @@
+# Virtual environments
+EnergyForecasting/venv/
+renewable_energy_trading/venv/
+venv/
+
+# Node modules
+node_modules/
+
+# Hardhat build
+artifacts/
+cache/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VSCode
+.vscode/
+
+# ML models (optional)
+*.h5

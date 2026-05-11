@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Blockchain Energy Trading</title>
+
+<style>
+
+body {
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#0f172a;
+    color:white;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container {
+    background:#020617;
+    padding:30px;
+    border-radius:12px;
+    width:420px;
+    box-shadow:0px 0px 20px rgba(0,0,0,0.6);
+}
+
+h2 {
+    color:#38bdf8;
+    text-align:center;
+    margin-bottom:20px;
+}
+
+/* ⭐ LIVE FORECAST BAR */
+.forecast-box {
+    background:#020617;
+    border:1px solid #1e293b;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:20px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.forecast-bar {
+    width:100%;
+    height:10px;
+    background:#1e293b;
+    border-radius:10px;
+    margin-top:8px;
+    overflow:hidden;
+}
+
+#forecastFill {
+    height:100%;
+    width:0%;
+    background:#38bdf8;
+    transition:width 0.5s ease;
+}
+
+label {
+    display:block;
+    margin-top:12px;
+    font-size:14px;
+}
+
+input {
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    border-radius:6px;
+    border:none;
+    background:#e5e7eb;
+}
+
+button {
+    width:100%;
+    margin-top:18px;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#22c55e;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:15px;
+}
+
+button:hover {
+    background:#16a34a;
+}
+
+#result {
+    margin-top:20px;
+    background:#1e293b;
+    padding:18px;
+    border-radius:10px;
+    min-height:80px;
+    width:100%;
+    box-sizing:border-box;
+    overflow-wrap: break-word;
+}
+
+.success-box {
+    margin-top:15px;
+    padding:12px;
+    border-radius:8px;
+    background:#16a34a;
+    color:white;
+    font-weight:bold;
+    text-align:center;
+
+    opacity:0;
+    transform:translateY(10px);
+    animation:fadeSuccess 0.6s ease forwards;
+}
+
+@keyframes fadeSuccess {
+    to {
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>⚡ AI Blockchain Energy Trading</h2>
+
+<!-- ⭐ LIVE FORECAST BAR -->
+<div id="forecastBox" class="forecast-box">
+⚡ Live Forecast Demand: Loading...
+<div class="forecast-bar">
+<div id="forecastFill"></div>
+</div>
+</div>
+
+<label for="seller">Seller Address</label>
+<input id="seller"
+       name="seller"
+       placeholder="Enter Ganache seller wallet address"
+       title="Seller wallet address">
+
+<label for="buyer">Buyer Address</label>
+<input id="buyer"
+       name="buyer"
+       placeholder="Enter Ganache buyer wallet address"
+       title="Buyer wallet address">
+
+<label for="amount">Energy Amount</label>
+<input id="amount"
+       name="amount"
+       type="number"
+       value="10"
+       placeholder="Energy units"
+       title="Energy amount">
+
+<label for="price">Price</label>
+<input id="price"
+       name="price"
+       type="number"
+       value="5"
+       placeholder="Energy price"
+       title="Energy price">
+
+
+<button onclick="proposeTrade()">🚀 Propose Trade</button>
+
+<div id="result">Result will appear here...</div>
+
+</div>
+
+<script>
+
+async function loadForecast() {
+
+    try {
+
+        const amount = document.getElementById("amount").value || 10;
+        const price  = document.getElementById("price").value || 5;
+
+        const res = await fetch(
+            `http://127.0.0.1:5001/forecast?amount=${amount}&price=${price}`
+        );
+
+        const data = await res.json();
+        const value = data.predicted_demand || 0;
+
+        document.getElementById("forecastBox").innerHTML =
+            `⚡ Live Forecast Demand: ${value.toFixed(2)}
+             <div class="forecast-bar">
+                <div id="forecastFill" style="width:${value*100}%"></div>
+             </div>`;
+    }
+    catch(err){
+        console.log("Forecast not available");
+    }
+}
+
+setInterval(loadForecast, 5000);
+loadForecast();
+
+
+/* ⭐ PROPOSE TRADE */
+async function proposeTrade() {
+
+    const body = {
+        seller: document.getElementById("seller").value,
+        buyer: document.getElementById("buyer").value,
+        amount: Number(document.getElementById("amount").value),
+        price: Number(document.getElementById("price").value)
+    };
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/propose_trade", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        document.getElementById("result").innerHTML = `
+        <h3>📊 Trade Result</h3>
+
+        <p><b>Forecast Demand:</b> ${data.forecast_value.toFixed(2)}</p>
+
+        <p><b>AI Suggested Price:</b> ${data.ai_recommendation.recommended_price}</p>
+
+        <p><b>Confidence Score:</b> ${data.ai_recommendation.confidence_score}</p>
+
+        <p><b>Reason:</b> ${data.ai_recommendation.reasoning}</p>
+
+        <div class="success-box">
+            ✅ Transaction Successful
+        </div>
+
+        <p style="font-size:12px; opacity:0.8; margin-top:10px;">
+            Hash: ${data.transaction_hash}
+        </p>`;
+    }
+    catch(err){
+        document.getElementById("result").innerText =
+            "❌ Backend not running";
+    }
+}
+
+window.onload = () => {
+    loadForecast();
+
+    document.getElementById("amount")
+        .addEventListener("input", loadForecast);
+
+    document.getElementById("price")
+        .addEventListener("input", loadForecast);
+};
+
+</script>
+
+
+</body>
+</html>
