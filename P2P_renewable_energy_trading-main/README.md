@@ -81,7 +81,7 @@ P2P_renewable_energy_trading/
 ## 🚀 How to Run Locally
 
   1️⃣ Clone Repository
-  git clone https://github.com/sharminsheik47-wq/P2P_renewable_energy_trading.git
+  git clone https://github.com/Divxyz/Hybrid-AI-Blockchain-Energy-Forecasting.git
   cd P2P_renewable_energy_trading
   
   2️⃣ Setup Energy Forecasting Service
@@ -128,9 +128,9 @@ Please fork the repository and submit a pull request with your improvements.
 ---
 
 ## Copyright
-© 2026 Sharmin
+© 2026 Divya Bala
 
 ---
 
 ## Author
-sharminsheik47@gmail.com | Sharmin
+divyabalasrinivasan@gmail.com | Divya Bala
